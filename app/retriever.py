@@ -4,10 +4,12 @@ import json
 import threading
 from pathlib import Path
 from typing import Any
+import os
+os.environ["SENTENCE_TRANSFORMERS_HOME"] = "/opt/render/project/src/.cache"
 
 
 CATALOG_PATH = Path(__file__).resolve().parent.parent / "data" / "catalog.json"
-EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
+EMBEDDING_MODEL_NAME = "paraphrase-MiniLM-L3-v2"
 
 _catalog: list[dict[str, Any]] = []
 _index: Any | None = None
