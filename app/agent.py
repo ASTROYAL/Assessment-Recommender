@@ -300,7 +300,7 @@ async def get_reply(messages: list[dict]) -> dict:
 
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel(
-            model_name=os.getenv("GEMINI_MODEL", "gemini-2.0-flash-lite"),
+            model_name=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
             system_instruction=enriched_system_prompt,
         )
         response = await asyncio.wait_for(
