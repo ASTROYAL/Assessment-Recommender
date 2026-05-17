@@ -20,7 +20,7 @@ _embeddings: Any = None
 
 def _embed_batch(texts: list[str]) -> list[list[float]]:
     result = genai.embed_content(
-        model="models/embedding-001",
+        model="models/text-embedding-004",
         content=texts,
         task_type="retrieval_document",
     )
@@ -66,7 +66,7 @@ def search(query: str, top_k: int = 10) -> list[dict]:
         return []
 
     result = genai.embed_content(
-        model="models/embedding-001",
+        model="models/text-embedding-004",
         content=query,
         task_type="retrieval_query",
     )
