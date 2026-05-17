@@ -5,12 +5,21 @@ import os
 from pathlib import Path
 from typing import Any
 
+import httpx
 import numpy as np
-import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+EMBED_URL = (
+    "https://generativelanguage.googleapis.com/v1/models/"
+    "text-embedding-004:embedContent"
+)
+BATCH_URL = (
+    "https://generativelanguage.googleapis.com/v1/models/"
+    "text-embedding-004:batchEmbedContents"
+)
 
 CATALOG_PATH = Path(__file__).resolve().parent.parent / "data" / "catalog.json"
 
@@ -19,12 +28,41 @@ _embeddings: Any = None
 
 
 def _embed_batch(texts: list[str]) -> list[list[float]]:
-    result = genai.embed_content(
-        model="models/text-embedding-004",
-        content=texts,
-        task_type="retrieval_document",
+    requests_body = {
+        "requests": [
+            {
+                "model": "models/text-embedding-004",
+                "content": {"parts": [{"text": t}]},
+                "taskType": "RETRIEVAL_DOCUMENT",
+            }
+            for t in texts
+        ]
+    }
+    resp = httpx.post(
+        BATCH_URL,
+        params={"key": GEMINI_API_KEY},
+        json=requests_body,
+        timeout=60,
     )
-    return result["embedding"]
+    resp.raise_for_status()
+    data = resp.json()
+    return [e["values"] for e in data["embeddings"]]
+
+
+def _embed_query(text: str) -> list[float]:
+    body = {
+        "model": "models/text-embedding-004",
+        "content": {"parts": [{"text": text}]},
+        "taskType": "RETRIEVAL_QUERY",
+    }
+    resp = httpx.post(
+        EMBED_URL,
+        params={"key": GEMINI_API_KEY},
+        json=body,
+        timeout=30,
+    )
+    resp.raise_for_status()
+    return resp.json()["embedding"]["values"]
 
 
 def init_retriever() -> None:
@@ -65,12 +103,7 @@ def search(query: str, top_k: int = 10) -> list[dict]:
     if _embeddings is None or not _catalog:
         return []
 
-    result = genai.embed_content(
-        model="models/text-embedding-004",
-        content=query,
-        task_type="retrieval_query",
-    )
-    q = np.array(result["embedding"], dtype=np.float32)
+    q = np.array(_embed_query(query), dtype=np.float32)
     q = q / max(float(np.linalg.norm(q)), 1e-9)
 
     scores = _embeddings @ q
