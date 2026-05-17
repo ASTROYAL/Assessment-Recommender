@@ -46,7 +46,15 @@ GEMINI_MODEL=gemini-2.0-flash-lite
 python scraper.py
 ```
 
-5. Start the API.
+5. Generate catalog embeddings once if `data/embeddings.npy` and `data/catalog_embedded.json` are missing.
+
+```bash
+python embed_catalog.py
+```
+
+Commit both generated files before deploying so Render can load them without rebuilding embeddings on startup.
+
+6. Start the API.
 
 ```bash
 cd app
@@ -66,6 +74,16 @@ python scraper.py
 ```
 
 It prints progress as it runs and waits one second after each request to avoid rate limiting.
+
+## Generate embeddings
+
+The retriever loads `data/embeddings.npy` and `data/catalog_embedded.json` when they exist. Generate them once locally:
+
+```bash
+python embed_catalog.py
+```
+
+This script calls Gemini's single `embedContent` endpoint once per assessment, normalizes the vectors, and writes both output files under `data/`. Commit those files so hosted startup does not burn quota by embedding the whole catalog again.
 
 ## API examples
 
