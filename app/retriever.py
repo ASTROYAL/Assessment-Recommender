@@ -17,7 +17,7 @@ EMBED_URL = (
     "text-embedding-004:embedContent"
 )
 BATCH_URL = (
-    "https://generativelanguage.googleapis.com/v1/models/"
+    "https://generativelanguage.googleapis.com/v1beta/models/"
     "text-embedding-004:batchEmbedContents"
 )
 
