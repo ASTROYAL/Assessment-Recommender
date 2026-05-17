@@ -37,7 +37,7 @@ def init_retriever():
     for i in range(0, len(texts), 100):
         batch = texts[i : i + 100]
         result = genai.embed_content(
-            model="models/embedding-001",
+            model="models/text-embedding-004",
             content=batch,
             task_type="retrieval_document",
         )
@@ -54,7 +54,7 @@ def search(query: str, top_k: int = 10) -> list[dict]:
         return []
 
     result = genai.embed_content(
-        model="models/embedding-001",
+        model="models/text-embedding-004",
         content=query,
         task_type="retrieval_query",
     )
