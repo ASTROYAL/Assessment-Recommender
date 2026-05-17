@@ -13,7 +13,7 @@ load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 EMBED_URL = (
-    "https://generativelanguage.googleapis.com/v1/models/"
+    "https://generativelanguage.googleapis.com/v1beta/models/"
     "text-embedding-004:embedContent"
 )
 BATCH_URL = (
@@ -28,25 +28,22 @@ _embeddings: Any = None
 
 
 def _embed_batch(texts: list[str]) -> list[list[float]]:
-    requests_body = {
-        "requests": [
-            {
-                "model": "models/text-embedding-004",
-                "content": {"parts": [{"text": t}]},
-                "taskType": "RETRIEVAL_DOCUMENT",
-            }
-            for t in texts
-        ]
-    }
-    resp = httpx.post(
-        BATCH_URL,
-        params={"key": GEMINI_API_KEY},
-        json=requests_body,
-        timeout=60,
-    )
-    resp.raise_for_status()
-    data = resp.json()
-    return [e["values"] for e in data["embeddings"]]
+    results = []
+    for text in texts:
+        body = {
+            "model": "models/text-embedding-004",
+            "content": {"parts": [{"text": text}]},
+            "taskType": "RETRIEVAL_DOCUMENT",
+        }
+        resp = httpx.post(
+            "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent",
+            params={"key": GEMINI_API_KEY},
+            json=body,
+            timeout=30,
+        )
+        resp.raise_for_status()
+        results.append(resp.json()["embedding"]["values"])
+    return results
 
 
 def _embed_query(text: str) -> list[float]:
