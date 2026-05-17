@@ -458,7 +458,7 @@ APP_HTML = """
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
-        retriever.load_index()
+        retriever.init_retriever()
         app.state.retriever_ready = True
         app.state.retriever_error = None
         print("Retriever index loaded successfully.")
