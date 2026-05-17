@@ -57,7 +57,7 @@ def init_retriever() -> None:
     print(f"[retriever] Ready. Shape: {_embeddings.shape}")
 
 
-# Keep load_index as alias so main.py doesn't break
+# Alias so main.py works without changes
 load_index = init_retriever
 
 
